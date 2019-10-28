@@ -5,7 +5,7 @@ This model is poorly developed now, and has not been tested against independent 
 
 ## To Do:
 
-* More exploritory analysis, especially examination of possible interactive effects.
+* More exploritory analysis
 * Better lit review
   * Have others modeled this before?
   * What factors should I expect to be important?

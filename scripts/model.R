@@ -70,6 +70,26 @@ varImp(cr_model, scale = F)
 
 
 #####################################################################
+# Prediction 
+#####################################################################
+
+df <- data.frame(spp = factor(rep("white pine", 4), levels = levels(train$spp)),
+                 dbh_mid = rep(12, 4),
+                 cr_mid = seq(10, 70, 20),
+                 ba_mid = rep(150, 4),
+                 bal_mid = seq(225, 0, -75),
+                 forest_type_s = factor(rep("White pine", 4),
+                                        levels = levels(train$forest_type_s)),
+                 lat = rep(44.7, 4),
+                 lon = rep(-73.6, 4))
+
+df_trans <- predict(preproc_op, newdata = df)
+
+df_pred <- df %>% 
+  mutate(y_hat = predict(cr_model, newdata = df_trans))
+
+
+#####################################################################
 # Save
 #####################################################################
 

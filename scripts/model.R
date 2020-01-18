@@ -13,19 +13,23 @@ nf_fia <- nf_fia %>%
   filter(status_change == "lived") %>% 
   select(cr_rate, spp, dbh_mid, cr_mid, crown_class_s, tree_class_s,
          ba_mid, bal_mid, forest_type_s, stocking_s, landscape, 
-         site_class, slope, aspect, lat, lon, elev) 
+         site_class, slope, aspect, lat, lon, elev, plot) 
 
 # test set is 20% of full dataset
 test_size <- .2
 
+# define test set based on plots (to make it truely independent)
 set.seed(10)
-index <- createDataPartition(nf_fia$cr_rate, times = 1, p = test_size, list = FALSE)
+test_plots <- sample(unique(nf_fia$plot), 
+                     size = round(test_size*length(unique(nf_fia$plot))), 
+                     replace = FALSE)
 
+index <- which(nf_fia$plot %in% test_plots)
 train <- nf_fia[-index,]
 test <- nf_fia[index,]
 
-x <- train[,-1]
-y <- train[,1]
+x <- select(train, -cr_rate, -plot)
+y <- select(train, cr_rate)
 
 
 #####################################################################

@@ -32,7 +32,7 @@ train <- nf_fia[-index,]
 test <- nf_fia[index,]
 
 x <- select(train, -cr_rate, -plot)
-y <- select(train, cr_rate)
+y <- train[,1]
 
 
 #####################################################################
@@ -42,6 +42,7 @@ y <- select(train, cr_rate)
 set.seed(1)
 cr_growth_model_full <- train(x, y,
                   method = "ranger",
+                  preProcess = c("center", "scale", "YeoJohnson"),
                   num.trees = 200,
                   importance = 'impurity',
                   tuneGrid = data.frame(mtry = seq(2, 14, by = 4),
@@ -92,4 +93,4 @@ df_pred <- df %>%
 #####################################################################
 
 # STOP! Too big to fit on GitHub
-# save(cr_growth_model_full, file = "../big-rdas/cr-growth-model-full.rda")
+save(cr_growth_model_full, file = "../big-rdas/cr-growth-model-full.rda")

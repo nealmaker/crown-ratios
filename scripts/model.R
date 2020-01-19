@@ -42,6 +42,7 @@ y <- select(train, cr_rate)
 set.seed(1)
 cr_growth_model_full <- train(x, y,
                   method = "ranger",
+                  preProcess = c("center", "scale", "YeoJohnson"),
                   num.trees = 200,
                   importance = 'impurity',
                   tuneGrid = data.frame(mtry = seq(2, 14, by = 4),

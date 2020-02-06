@@ -36,7 +36,7 @@ y <- train[,1]
 
 
 #####################################################################
-# Train model
+# Train full model
 #####################################################################
 
 set.seed(1)
@@ -51,7 +51,7 @@ cr_growth_model_full <- train(x, y,
 
 
 #####################################################################
-# Results 
+# Results full
 #####################################################################
 
 cr_growth_model_full$results
@@ -62,7 +62,7 @@ varImp(cr_growth_model_full, scale = F)
 
 
 #####################################################################
-# Prediction 
+# Prediction full
 #####################################################################
 
 df <- data.frame(spp = factor(rep("white pine", 4), levels = levels(train$spp)),
@@ -89,8 +89,44 @@ df_pred <- df %>%
 
 
 #####################################################################
+# Train operational model
+#####################################################################
+
+x2 <- select(x, 
+             -landscape, 
+             -crown_class, 
+             -tree_class, 
+             -aspect, 
+             -slope, 
+             -stocking)
+
+set.seed(1)
+cr_growth_model_op <- 
+  train(x2, y,
+        method = "ranger",
+        preProcess = c("center", "scale", "YeoJohnson"),
+        num.trees = 200,
+        importance = 'impurity',
+        tuneGrid = data.frame(mtry = seq(2, 10, by = 2),
+                              splitrule = rep("variance", 5),
+                              min.node.size = rep(5, 5)))
+
+
+#####################################################################
+# Results operational model
+#####################################################################
+
+cr_growth_model_op$results
+
+plot(cr_growth_model_op)
+
+varImp(cr_growth_model_op, scale = F)
+
+
+#####################################################################
 # Save
 #####################################################################
 
 # STOP! Too big to fit on GitHub
 save(cr_growth_model_full, file = "../big-rdas/cr-growth-model-full.rda")
+save(cr_growth_model_op, file = "../big-rdas/cr-growth-model-op.rda")

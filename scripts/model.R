@@ -29,7 +29,9 @@ test_plots <- sample(unique(nf_fia$plot),
 
 index <- which(nf_fia$plot %in% test_plots)
 train <- nf_fia[-index,]
-test <- nf_fia[index,]
+cr_growth_test <- nf_fia[index,]
+
+# save(cr_growth_test, file = "../big-rdas/cr-growth-test.rda")
 
 x <- select(train, -cr_rate, -plot)
 y <- train[,1]
@@ -121,6 +123,38 @@ cr_growth_model_op$results
 plot(cr_growth_model_op)
 
 varImp(cr_growth_model_op, scale = F)
+
+
+#####################################################################
+# Train operational linear model
+#####################################################################
+
+train2 <- select(train, 
+                 -landscape,
+                 -forest_type,
+                 -spp,
+                 -crown_class, 
+                 -tree_class, 
+                 -site_class,
+                 -aspect, 
+                 -slope, 
+                 -stocking,
+                 -plot)
+
+set.seed(1)
+train2 <- train2[sample(nrow(train2), 10000),]
+
+set.seed(1)
+cr_growth_model_op_glm <- glm(cr_rate ~ ., data = train2)
+
+
+#####################################################################
+# Results operational linear model
+#####################################################################
+
+summary(cr_growth_model_op_glm)
+
+varImp(cr_growth_model_op_glm, scale = F)
 
 
 #####################################################################

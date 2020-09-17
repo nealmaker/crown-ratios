@@ -1,4 +1,5 @@
 library("tidyverse")
+library("minpack.lm")
 
 temp <- tempfile()
 download.file("https://github.com/nealmaker/fia-data-nf/raw/master/rda/nf-fia.rda", 
@@ -15,7 +16,7 @@ nf_fia <- nf_fia %>%
 # test set is 20% of full dataset
 test_size <- .2
 
-# define test set based on plots (to make it truely independent)
+# define test set based on plots (to make it truly independent)
 set.seed(10)
 test_plots <- sample(unique(nf_fia$plot), 
                      size = round(test_size*length(unique(nf_fia$plot))), 
@@ -25,10 +26,17 @@ index <- which(nf_fia$plot %in% test_plots)
 train <- nf_fia[-index,]
 test <- nf_fia[index,]
 
+# initialize coefficients using Weiskittel nomenclature & values from a model
+# we made that didn't differentiate species.
+start <- list(b1 = .6,
+              b2 = 40,
+              b3 = 10)
+
 
 # gets coefficients for any data frame
 get_coefs <- function(df) {
-  mod <- lm(cr_rate ~ dbh + bal + ba + cr, data = df)
+  mod <- nlsLM(cr_rate + 30 ~ b1*exp(-((cr - b2) ^ 2 / (2 * b3 ^ 2))), ### TRYING TO GET A GAUSSIAN MODEL TO WORK FOR CR, THEN CAN ADD IN TERMS FOR OTHER FACTORS LINEARLY
+               start = start, data = df)
   
   coef(mod)
 }
@@ -42,17 +50,3 @@ cr_growth_coef <- as.data.frame(do.call(rbind, coefs_list))
 # save
 save(cr_growth_coef, file = "cr-growth-coef.rda")
 write.csv(cr_growth_coef, file = "cr-growth-coef.csv")
-
-
-###################
-## TEST
-###################
-# results <- test %>% mutate(cr_rate_pred = cr_growth_coef[as.character(spp),1] + 
-#                              cr_growth_coef[as.character(spp),2] * dbh +
-#                              cr_growth_coef[as.character(spp),3] * bal + 
-#                              cr_growth_coef[as.character(spp),4] * ba + 
-#                              cr_growth_coef[as.character(spp),5] * cr,
-#                            err = cr_rate_pred - cr_rate)
-# 
-# # RMSE
-# sqrt(sum(results$err^2)/nrow(results))
